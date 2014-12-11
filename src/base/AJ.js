@@ -5,12 +5,15 @@
  */
 (function(window){
 	var doc = window.document, loc = window.location, nav = window.navigator;
+	var class2type = {} ;
+		
 	var AJ = {
 		version : '0.0.1',
 		author : 'jianke',
 		errorStack : [],
 		
-		isTouch : (/(ipad|iphone|ios|android)/i.test(window.navigator.userAgent)) ,
+		isTouch : (/(ipad|iphone|ios|android)/i.test(nav.userAgent)) ,
+		
 		namespace : function(path, args) {
 			global = this;
 			var ns = function(name) {
@@ -105,7 +108,7 @@
 					.replace(/\s+$/, '');
 		},
 
-		bindReady : function(handler) {
+		ready : function(handler) {
 			if (document.readystate === 'complete') {
 				return setTimeout(handler, 1);
 			}
@@ -148,10 +151,34 @@
 			
 		},
 		
-		proxy : function(){
+		proxy : function(fn,context){
+			 if ( typeof context === 'string') {
+                 var tmp = fn[context];
+                 context = fn;
+                 fn = tmp;
+             }
+
+             if (typeof fn === 'function') {
+                 return undefined;
+             }
+
+             var args = arguments.slice(2), proxy = function() {
+                 return fn.apply(context, args.concat(arguments.slice()));
+             };
+             
+             return proxy;
+		},
+		
+		type : function(obj){
+			var class2type = {},toString = Object.prototype.toString ;
 			
+			return obj == null ? String(obj) : class2type[toString.call(obj)] || 'object';
 		}
 	};
+	
+	AJ.each('Boolean Number String Function Array Date RegExp Object'.split(' '), function(i,name){
+		class2type["[object " + name + "]"] = name.toLowerCase();
+	});
 	
 	window.$ = window.AJ = AJ ;
 })(this);
